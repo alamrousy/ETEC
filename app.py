@@ -169,7 +169,7 @@ import numpy as np
 import base64
 import plotly.express as px
 import seaborn as sns
-#import ETEC_Watson_Analysis5 as ETEC
+# import ETEC_Watson_Analysis5 as ETEC
 #######   Decission Tree   #######
 
 if 'Train_Test_Split_dt' not in st.session_state:
@@ -502,6 +502,7 @@ def plot_multivariate(obj_plot, radio_plot):
         st.sidebar.markdown("If None selected, it will plot the correlation of all numeric variables.")
         if st.sidebar.button('Plot heatmap chart'):
             fig = obj_plot.Corr(cols_list, correlation)
+            st.set_option('deprecation.showPyplotGlobalUse', False)
             st.pyplot()
 
     def map_func(function):
