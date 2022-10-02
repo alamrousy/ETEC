@@ -169,7 +169,7 @@ import numpy as np
 import base64
 import plotly.express as px
 import seaborn as sns
-import ETEC_Watson_Analysis5 as ETEC
+#import ETEC_Watson_Analysis5 as ETEC
 #######   Decission Tree   #######
 
 if 'Train_Test_Split_dt' not in st.session_state:
