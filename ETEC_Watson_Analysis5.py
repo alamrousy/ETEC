@@ -9,7 +9,7 @@ import seaborn as sns
 import os
 import math
 import matplotlib.pyplot as plt
-from PyQt5 import QtWidgets
+# from PyQt5 import QtWidgets
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from sklearn.preprocessing import StandardScaler
@@ -17,31 +17,31 @@ from sklearn.metrics import mean_squared_error
 from sklearn import tree
 # from IPython import display
 
-class ScrollableWindow(QtWidgets.QMainWindow):
-    def __init__(self, fig):
-        self.qapp = QtWidgets.QApplication([])
-
-        QtWidgets.QMainWindow.__init__(self)
-        self.widget = QtWidgets.QWidget()
-        self.setCentralWidget(self.widget)
-        self.widget.setLayout(QtWidgets.QVBoxLayout())
-        self.widget.layout().setContentsMargins(0, 0, 0, 0)
-        self.widget.layout().setSpacing(1)
-        # self.setGeometry(1000,1000)
-        # self.size
-
-        self.fig = fig
-        self.canvas = FigureCanvas(self.fig)
-        self.canvas.draw()
-        self.scroll = QtWidgets.QScrollArea(self.widget)
-        self.scroll.setWidget(self.canvas)
-
-        self.nav = NavigationToolbar(self.canvas, self.widget)
-        self.widget.layout().addWidget(self.nav)
-        self.widget.layout().addWidget(self.scroll)
-
-        self.show()
-        exit(self.qapp.exec_())
+# class ScrollableWindow(QtWidgets.QMainWindow):
+#     def __init__(self, fig):
+#         self.qapp = QtWidgets.QApplication([])
+# 
+#         QtWidgets.QMainWindow.__init__(self)
+#         self.widget = QtWidgets.QWidget()
+#         self.setCentralWidget(self.widget)
+#         self.widget.setLayout(QtWidgets.QVBoxLayout())
+#         self.widget.layout().setContentsMargins(0, 0, 0, 0)
+#         self.widget.layout().setSpacing(1)
+#         # self.setGeometry(1000,1000)
+#         # self.size
+# 
+#         self.fig = fig
+#         self.canvas = FigureCanvas(self.fig)
+#         self.canvas.draw()
+#         self.scroll = QtWidgets.QScrollArea(self.widget)
+#         self.scroll.setWidget(self.canvas)
+# 
+#         self.nav = NavigationToolbar(self.canvas, self.widget)
+#         self.widget.layout().addWidget(self.nav)
+#         self.widget.layout().addWidget(self.scroll)
+# 
+#         self.show()
+#         exit(self.qapp.exec_())
 
 class ETEC_PCA:
     def train(x_train,x_test,ETEC_n_components=None, *, ETEC_copy=True, ETEC_whiten=False, ETEC_svd_solver='auto', ETEC_tol=0.0, ETEC_iterated_power='auto',
@@ -660,8 +660,6 @@ class ETEC_Gradient_Boosting:
         return plt
 
 
-
-
 class ETEC_AdaBoosting:
     # def Draw(model,x_train,y_train):
     #     plt.figure(figsize=(12, 12))
@@ -735,7 +733,6 @@ class ETEC_AdaBoosting:
         #plt.show()
 
         return plt
-
 
 
 class ETEC_Neural_network:
@@ -821,9 +818,6 @@ class ETEC_Neural_network:
         return plt
 
 
-
-
-
 class ETEC_LogisticRegression:
 
     def Train(ETEC_X_Train, ETEC_Y_Train,ETEC_penalty='l2', *, ETEC_dual=False, ETEC_tol=0.0001, ETEC_C=1.0, ETEC_fit_intercept=True, ETEC_intercept_scaling=1,
@@ -848,7 +842,7 @@ class ETEC_LogisticRegression:
         return mean_squared_error(ETEC_Y_test, y_pred)
 
 
-    def R_square(Y_test, y_pred):
+    def Accuracy(Y_test, y_pred):
         from sklearn.metrics import r2_score
         return r2_score(Y_test, y_pred)*100
 
@@ -876,7 +870,7 @@ class ETEC_LinearRegression:
         return mean_squared_error(ETEC_Y_test, y_pred)
 
 
-    def R_square(Y_test, y_pred):
+    def Accuracy(Y_test, y_pred):
         from sklearn.metrics import r2_score
         return r2_score(Y_test, y_pred)*100
 
@@ -903,7 +897,7 @@ class ETEC_PoissonRegressor:
         return mean_squared_error(ETEC_Y_test, y_pred)
 
 
-    def R_square(Y_test, y_pred):
+    def Accuracy(Y_test, y_pred):
         from sklearn.metrics import r2_score
         return r2_score(Y_test, y_pred)*100
 
@@ -940,7 +934,7 @@ class ETEC_LassoRegressor:
         return mean_squared_error(ETEC_Y_test, y_pred)
 
 
-    def R_square(Y_test, y_pred):
+    def Accuracy(Y_test, y_pred):
         from sklearn.metrics import r2_score
         return r2_score(Y_test, y_pred)*100
 
