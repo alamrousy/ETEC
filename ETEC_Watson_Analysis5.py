@@ -5,22 +5,50 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import classification_report
 import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression,PoissonRegressor,ridge_regression,Lasso,BayesianRidge,ElasticNetCV,LogisticRegression,Ridge
+from sklearn.gaussian_process import GaussianProcessRegressor
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import Ridge
+from sklearn.neural_network import MLPRegressor
+from sklearn.svm import SVR
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.svm import SVC
+from sklearn.cluster import MiniBatchKMeans
+from yellowbrick.cluster import intercluster_distance,InterclusterDistance
+from yellowbrick.classifier import ROCAUC,PrecisionRecallCurve,ClassPredictionError
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.cluster import KMeans
+from streamlit_yellowbrick import st_yellowbrick
 import seaborn as sns
 import os
 import math
+import sklearn.metrics as metrics
+from yellowbrick.regressor import PredictionError,AlphaSelection, ResidualsPlot
 import matplotlib.pyplot as plt
+from yellowbrick.regressor import ResidualsPlot
+from sklearn.linear_model import Ridge
 # from PyQt5 import QtWidgets
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_squared_error
 from sklearn import tree
+import statsmodels.api as sm
+from statsmodels.formula.api import ols
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.neighbors import KNeighborsClassifier
+
+import statsmodels.formula.api as smf
+
 # from IPython import display
 
 # class ScrollableWindow(QtWidgets.QMainWindow):
 #     def __init__(self, fig):
 #         self.qapp = QtWidgets.QApplication([])
-# 
+#
 #         QtWidgets.QMainWindow.__init__(self)
 #         self.widget = QtWidgets.QWidget()
 #         self.setCentralWidget(self.widget)
@@ -29,20 +57,19 @@ from sklearn import tree
 #         self.widget.layout().setSpacing(1)
 #         # self.setGeometry(1000,1000)
 #         # self.size
-# 
+#
 #         self.fig = fig
 #         self.canvas = FigureCanvas(self.fig)
 #         self.canvas.draw()
 #         self.scroll = QtWidgets.QScrollArea(self.widget)
 #         self.scroll.setWidget(self.canvas)
-# 
+#
 #         self.nav = NavigationToolbar(self.canvas, self.widget)
 #         self.widget.layout().addWidget(self.nav)
 #         self.widget.layout().addWidget(self.scroll)
-# 
+#
 #         self.show()
-#         exit(self.qapp.exec_())
-
+#         exit(self.qapp.exec_(
 class ETEC_PCA:
     def train(x_train,x_test,ETEC_n_components=None, *, ETEC_copy=True, ETEC_whiten=False, ETEC_svd_solver='auto', ETEC_tol=0.0, ETEC_iterated_power='auto',
              ETEC_random_state=None):
@@ -185,6 +212,31 @@ class ETEC_DATA:
 
 
 class ETEC_Decission_Tree:
+    def roc_cur(X_train, y_train,X_test, y_test):
+        oz = ROCAUC(DecisionTreeClassifier())
+        oz.fit(X_train, y_train)
+        oz.score(X_test, y_test)
+        oz.show()
+    def preci_recall(X_train, y_train,X_test, y_test):
+        oz = PrecisionRecallCurve(DecisionTreeClassifier())
+        oz.fit(X_train, y_train)
+        oz.score(X_test, y_test)
+        oz.show()
+
+    def predect_error(X_train, y_train, X_test, y_test):
+        visualizer = ClassPredictionError(
+            DecisionTreeClassifier()
+        )
+
+        # Fit the training data to the visualizer
+        visualizer.fit(X_train, y_train)
+
+        # Evaluate the model on the test data
+        visualizer.score(X_test, y_test)
+
+        # Draw visualization
+        visualizer.show()
+
     # def Draw(df, ETEC_DT):
     #     # fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(10, 10), dpi=1000)
     #     # for index in range(0, 2):
@@ -209,7 +261,6 @@ class ETEC_Decission_Tree:
               ETEC_min_weight_fraction_leaf=0.0, ETEC_max_features=None, ETEC_random_state=None,
               ETEC_max_leaf_nodes=None,
               ETEC_min_impurity_decrease=0.0, ETEC_class_weight=None, ETEC_ccp_alpha=0.0):
-        from sklearn.tree import DecisionTreeClassifier
 
         ETEC_DT = DecisionTreeClassifier(criterion=ETEC_criterion, splitter=ETEC_splitter, max_depth=ETEC_max_depth,
                                          min_samples_split=ETEC_min_samples_split,
@@ -243,7 +294,7 @@ class ETEC_Decission_Tree:
         plt.figure(figsize=(8, 8))
         sns.heatmap(confusion_matrix(ETEC_Y_test.values, y_pred, ), xticklabels=ETEC_Y_test.drop_duplicates(),
                     yticklabels=ETEC_Y_test.drop_duplicates(), annot=True,
-                    fmt="d", cmap="Blues", annot_kws={"size": 20});
+                    fmt="d", cmap="YlGnBu", annot_kws={"size": 20});
         plt.title("decission tree", fontsize=25)
         plt.ylabel('True class')
         plt.xlabel('Predicted class')
@@ -253,8 +304,31 @@ class ETEC_Decission_Tree:
 
         return plt
 
-
 class ETEC_Random_Forest:
+    def roc_cur(X_train, y_train,X_test, y_test):
+        oz = ROCAUC(RandomForestClassifier())
+        oz.fit(X_train, y_train)
+        oz.score(X_test, y_test)
+        oz.show()
+    def preci_recall(X_train, y_train,X_test, y_test):
+        oz = PrecisionRecallCurve(RandomForestClassifier())
+        oz.fit(X_train, y_train)
+        oz.score(X_test, y_test)
+        oz.show()
+
+    def predect_error(X_train, y_train, X_test, y_test):
+        visualizer = ClassPredictionError(
+            RandomForestClassifier()
+        )
+
+        # Fit the training data to the visualizer
+        visualizer.fit(X_train, y_train)
+
+        # Evaluate the model on the test data
+        visualizer.score(X_test, y_test)
+
+        # Draw visualization
+        visualizer.show()
 
     # def Draw(df, ETEC_RF):
     #     from sklearn.tree import plot_tree
@@ -283,7 +357,6 @@ class ETEC_Random_Forest:
               ETEC_min_impurity_decrease=0.0, ETEC_bootstrap=True, ETEC_oob_score=False, ETEC_n_jobs=None,
               ETEC_random_state=None, ETEC_verbose=0, ETEC_warm_start=False, ETEC_class_weight=None, ETEC_ccp_alpha=0.0,
               ETEC_max_samples=None):
-        from sklearn.ensemble import RandomForestClassifier
 
         ETEC_RF = RandomForestClassifier(n_estimators=ETEC_n_estimators, criterion=ETEC_criterion,
                                          max_depth=ETEC_max_depth, min_samples_split=ETEC_min_samples_split,
@@ -334,10 +407,32 @@ class ETEC_Random_Forest:
 
         return plt
 
-
-
 class ETEC_SVM:
+    def roc_cur(X_train, y_train,X_test, y_test):
+        oz = ROCAUC(SVC())
+        oz.fit(X_train, y_train)
+        oz.score(X_test, y_test)
+        oz.show()
 
+    def preci_recall(X_train, y_train,X_test, y_test):
+        oz = PrecisionRecallCurve(SVC())
+        oz.fit(X_train, y_train)
+        oz.score(X_test, y_test)
+        oz.show()
+
+    def predect_error(X_train, y_train, X_test, y_test):
+        visualizer = ClassPredictionError(
+            SVC()
+        )
+
+        # Fit the training data to the visualizer
+        visualizer.fit(X_train, y_train)
+
+        # Evaluate the model on the test data
+        visualizer.score(X_test, y_test)
+
+        # Draw visualization
+        visualizer.show()
 
     #def Draw(svc, X, y):
         # from sklearn.decomposition import PCA
@@ -401,7 +496,6 @@ class ETEC_SVM:
     def Train(ETEC_X_Train, ETEC_Y_Train, *,ETEC_C=1.0, ETEC_kernel='linear', ETEC_degree=3, ETEC_gamma='scale', ETEC_coef0=0.0, ETEC_shrinking=True, ETEC_probability=False, ETEC_tol=0.001,
                                           ETEC_cache_size=200, ETEC_class_weight=None, ETEC_verbose=False, ETEC_max_iter=-1, ETEC_decision_function_shape='ovr',
                                           ETEC_break_ties=False, ETEC_random_state=None):
-        from sklearn.svm import SVC
         from sklearn.pipeline import make_pipeline
 
         ETEC_SVM = SVC( C=ETEC_C, kernel=ETEC_kernel, degree=ETEC_degree, gamma=ETEC_gamma, coef0=ETEC_coef0, shrinking=ETEC_shrinking, probability=ETEC_probability, tol=ETEC_tol,
@@ -447,9 +541,39 @@ class ETEC_SVM:
 
         return plt
 
-
-
 class ETEC_KNN:
+
+    def cluster(X):
+        model = KMeans()
+        visualizer = InterclusterDistance(model)
+
+        visualizer.fit(X)
+        visualizer.finalize()
+
+    def roc_cur(X_train, y_train,X_test, y_test):
+        oz = ROCAUC(KNeighborsClassifier())
+        oz.fit(X_train, y_train)
+        oz.score(X_test, y_test)
+        oz.show()
+    def preci_recall(X_train, y_train,X_test, y_test):
+        oz = PrecisionRecallCurve(KNeighborsClassifier())
+        oz.fit(X_train, y_train)
+        oz.score(X_test, y_test)
+        oz.show()
+
+    def predect_error(X_train, y_train, X_test, y_test):
+        visualizer = ClassPredictionError(
+            KNeighborsClassifier()
+        )
+
+        # Fit the training data to the visualizer
+        visualizer.fit(X_train, y_train)
+
+        # Evaluate the model on the test data
+        visualizer.score(X_test, y_test)
+
+        # Draw visualization
+        visualizer.show()
 
     # def Draw( x_test,y_test):
     #     from sklearn.svm import SVC
@@ -458,7 +582,6 @@ class ETEC_KNN:
 
     def Train(ETEC_X_Train, ETEC_Y_Train, ETEC_n_neighbors=5, *, ETEC_weights='uniform', ETEC_algorithm='auto', ETEC_leaf_size=30,
               ETEC_p=2, ETEC_metric='minkowski', ETEC_metric_params=None, ETEC_n_jobs=None):
-        from sklearn.neighbors import KNeighborsClassifier
 
         Knn = KNeighborsClassifier( n_neighbors=ETEC_n_neighbors, weights=ETEC_weights, algorithm=ETEC_algorithm, leaf_size=ETEC_leaf_size,
                         p=ETEC_p, metric=ETEC_metric, metric_params=ETEC_metric_params, n_jobs=ETEC_n_jobs)
@@ -504,6 +627,33 @@ class ETEC_KNN:
 
 
 class ETEC_K_means:
+
+
+    def roc_cur(X_train, y_train,X_test, y_test):
+        oz = ROCAUC(KMeans())
+        oz.fit(X_train, y_train)
+        oz.score(X_test, y_test)
+        oz.show()
+    def preci_recall(X_train, y_train,X_test, y_test):
+        oz = PrecisionRecallCurve(KMeans())
+        oz.fit(X_train, y_train)
+        oz.score(X_test, y_test)
+        oz.show()
+
+    def predect_error(X_train, y_train, X_test, y_test):
+        visualizer = ClassPredictionError(
+            KMeans()
+        )
+
+        # Fit the training data to the visualizer
+        visualizer.fit(X_train, y_train)
+
+        # Evaluate the model on the test data
+        visualizer.score(X_test, y_test)
+
+        # Draw visualization
+        visualizer.show()
+
     # def Draw(model,x_train,y_train):
     #     print('h')
         # plt.figure(figsize=(12, 12))
@@ -535,7 +685,6 @@ class ETEC_K_means:
         # plt.show()
     def Train(ETEC_X_Train, ETEC_Y_Train,ETEC_n_clusters=8, *, ETEC_init='k-means++',
               ETEC_n_init=10, ETEC_max_iter=300, ETEC_tol=0.0001, ETEC_verbose=0, ETEC_random_state=None, ETEC_copy_x=True, ETEC_algorithm='auto'):
-        from sklearn.cluster import KMeans
        # global n_clusters
 
         K_means = KMeans(n_clusters=ETEC_n_clusters,  init=ETEC_init, n_init=ETEC_n_init, max_iter=ETEC_max_iter,
@@ -579,9 +728,32 @@ class ETEC_K_means:
 
         return plt
 
-
-
 class ETEC_Gradient_Boosting:
+    def roc_cur(X_train, y_train,X_test, y_test):
+        oz = ROCAUC(GradientBoostingClassifier())
+        oz.fit(X_train, y_train)
+        oz.score(X_test, y_test)
+        oz.show()
+    def preci_recall(X_train, y_train,X_test, y_test):
+        oz = PrecisionRecallCurve(GradientBoostingClassifier())
+        oz.fit(X_train, y_train)
+        oz.score(X_test, y_test)
+        oz.show()
+
+    def predect_error(X_train, y_train, X_test, y_test):
+        visualizer = ClassPredictionError(
+            GradientBoostingClassifier()
+        )
+
+        # Fit the training data to the visualizer
+        visualizer.fit(X_train, y_train)
+
+        # Evaluate the model on the test data
+        visualizer.score(X_test, y_test)
+
+        # Draw visualization
+        visualizer.show()
+
     # def Draw(model,x_train,y_train):
         # plt.figure(figsize=(12, 12))
         # X_filtered = x_train
@@ -614,7 +786,6 @@ class ETEC_Gradient_Boosting:
               ETEC_min_samples_split=2, ETEC_min_samples_leaf=1, ETEC_min_weight_fraction_leaf=0.0, ETEC_max_depth=3, ETEC_min_impurity_decrease=0.0,
               ETEC_init=None, ETEC_random_state=None, ETEC_max_features=None, ETEC_verbose=0, ETEC_max_leaf_nodes=None,
               ETEC_warm_start=False, ETEC_validation_fraction=0.1, ETEC_n_iter_no_change=None, ETEC_tol=0.0001, ETEC_ccp_alpha=0.0):
-        from sklearn.ensemble import GradientBoostingClassifier
 
         gb = GradientBoostingClassifier( loss=ETEC_loss, learning_rate=ETEC_learning_rate, n_estimators=ETEC_n_estimators, subsample=ETEC_subsample, criterion=ETEC_criterion, min_samples_split=ETEC_min_samples_split,
                          min_samples_leaf=ETEC_min_samples_leaf, min_weight_fraction_leaf=ETEC_min_weight_fraction_leaf, max_depth=ETEC_max_depth, min_impurity_decrease=ETEC_min_impurity_decrease, init=ETEC_init, random_state=ETEC_random_state,
@@ -661,6 +832,31 @@ class ETEC_Gradient_Boosting:
 
 
 class ETEC_AdaBoosting:
+    def roc_cur(X_train, y_train,X_test, y_test):
+        oz = ROCAUC(AdaBoostClassifier())
+        oz.fit(X_train, y_train)
+        oz.score(X_test, y_test)
+        oz.show()
+    def preci_recall(X_train, y_train,X_test, y_test):
+        oz = PrecisionRecallCurve(AdaBoostClassifier())
+        oz.fit(X_train, y_train)
+        oz.score(X_test, y_test)
+        oz.show()
+
+    def predect_error(X_train, y_train, X_test, y_test):
+        visualizer = ClassPredictionError(
+            AdaBoostClassifier()
+        )
+
+        # Fit the training data to the visualizer
+        visualizer.fit(X_train, y_train)
+
+        # Evaluate the model on the test data
+        visualizer.score(X_test, y_test)
+
+        # Draw visualization
+        visualizer.show()
+
     # def Draw(model,x_train,y_train):
     #     plt.figure(figsize=(12, 12))
     #     X_filtered = x_train
@@ -692,7 +888,6 @@ class ETEC_AdaBoosting:
     def Train(ETEC_X_Train, ETEC_Y_Train,ETEC_Y_base_estimator=None, *, ETEC_Y_n_estimators=50,
               ETEC_Y_learning_rate=1.0, ETEC_Y_algorithm='SAMME.R', ETEC_Y_random_state=None):
 
-        from sklearn.ensemble import AdaBoostClassifier
 
         adaboost = AdaBoostClassifier( base_estimator=ETEC_Y_base_estimator,  n_estimators=ETEC_Y_n_estimators, learning_rate=ETEC_Y_learning_rate, algorithm=ETEC_Y_algorithm, random_state=ETEC_Y_random_state)
         adaboost.fit(ETEC_X_Train, ETEC_Y_Train)
@@ -736,6 +931,31 @@ class ETEC_AdaBoosting:
 
 
 class ETEC_Neural_network:
+    def roc_cur(X_train, y_train,X_test, y_test):
+        oz = ROCAUC(MLPClassifier())
+        oz.fit(X_train, y_train)
+        oz.score(X_test, y_test)
+        oz.show()
+    def preci_recall(X_train, y_train,X_test, y_test):
+        oz = PrecisionRecallCurve(MLPClassifier())
+        oz.fit(X_train, y_train)
+        oz.score(X_test, y_test)
+        oz.show()
+
+    def predect_error(X_train, y_train, X_test, y_test):
+        visualizer = ClassPredictionError(
+            MLPClassifier()
+        )
+
+        # Fit the training data to the visualizer
+        visualizer.fit(X_train, y_train)
+
+        # Evaluate the model on the test data
+        visualizer.score(X_test, y_test)
+
+        # Draw visualization
+        visualizer.show()
+
     # def Draw(model,x_train,y_train):
     #     plt.figure(figsize=(12, 12))
     #     X_filtered = x_train
@@ -770,7 +990,6 @@ class ETEC_Neural_network:
               ETEC_warm_start=False, ETEC_momentum=0.9, ETEC_nesterovs_momentum=True, ETEC_early_stopping=False, ETEC_validation_fraction=0.1,
               ETEC_beta_1=0.9, ETEC_beta_2=0.999, ETEC_epsilon=1e-08, ETEC_n_iter_no_change=10, ETEC_max_fun=15000):
 
-        from sklearn.neural_network import MLPClassifier
 
         nn = MLPClassifier( hidden_layer_sizes=ETEC_hidden_layer_sizes, activation=ETEC_activation,
                                        solver=ETEC_solver, alpha=ETEC_alpha, batch_size=ETEC_batch_size, learning_rate=ETEC_learning_rate,
@@ -848,7 +1067,21 @@ class ETEC_LogisticRegression:
 
     def coef(classifier):
         return classifier.coef_
+    def regression_results(x_train,y_train):
+        # x_train = sm.add_constant(x_train)
+        model = sm.Logit(y_train, x_train).fit()
+        return model.summary()
 
+    def visualization(y_test, X_test, y_pred):
+        X_test = np.arange(0, len(X_test), 1)
+        plt.scatter(X_test, y_test, color="black")
+        plt.plot(X_test, y_pred, color="blue")
+
+        plt.xticks(())
+        plt.yticks(())
+
+        plt.show()
+        return plt
 
 class ETEC_LinearRegression:
 
@@ -859,6 +1092,7 @@ class ETEC_LinearRegression:
         lr = LinearRegression(fit_intercept=ETEC_fit_intercept, normalize=ETEC_normalize, copy_X=ETEC_copy_X,
                               n_jobs=ETEC_n_jobs, positive=ETEC_positive)
         lr.fit(ETEC_X_Train, ETEC_Y_Train)
+
 
         # prediction
         return lr
@@ -877,11 +1111,61 @@ class ETEC_LinearRegression:
     def coef(classifier):
         return classifier.coef_
 
+    # def visualization(y_test,X_test,y_pred):
+    #         X_test = np.arange(0, len(X_test), 1)
+    #     # print(X_test)
+    #
+    #         plt.scatter(X_test, y_test, color="black")
+    #         plt.plot(X_test , y_pred, color="green")
+    #
+    #         plt.xticks((X_test))
+    #         plt.yticks((y_test))
+
+        # plt.show()
+        #     return plt
+    def visualization(x_train,y_train,X_test,y_test):
+        model = LinearRegression()
+        visualizer = ResidualsPlot(model,hist=False, qqplot=True)
+
+        visualizer.fit(x_train, y_train)  # Fit the training data to the visualizer
+        visualizer.score(X_test, y_test)  # Evaluate the model on the test data
+
+        visualizer.show()
+
+
+    def regression_results2(x_train, y_train):
+            x_train = sm.add_constant(x_train)
+            model = sm.OLS(y_train, x_train).fit()
+            # fig = plt.figure(figsize=(12, 8))
+            # fig = sm.graphics.plot_regress_exog(model,fig=fig)
+            return model
+    def regplot1(model):
+
+            fig = plt.figure(figsize=(12, 8))
+            fig = sm.graphics.plot_partregress_grid(model)
+            fig.tight_layout(pad=1.0)
+
+            return fig
+    def regplot2(model):
+
+            fig = plt.figure(figsize=(12, 8))
+            fig = sm.graphics.plot_ccpr_grid(model)
+            fig.tight_layout(pad=1.0)
+
+            return fig
+
+
+    def prediction_error(X_train,y_train,X_test,y_test):
+
+        model = PredictionError(LinearRegression())
+        model.fit(X_train, y_train)
+        model.score(X_test, y_test)
+        model.poof()
+
 
 class ETEC_PoissonRegressor:
 
     def Train(ETEC_X_Train, ETEC_Y_Train, *, ETEC_alpha=1.0, ETEC_fit_intercept=True, ETEC_max_iter=1000, ETEC_tol=0.0001, ETEC_warm_start=False, ETEC_verbose=0):
-        from sklearn.linear_model import PoissonRegressor
 
         pr = PoissonRegressor( alpha=ETEC_alpha, fit_intercept=ETEC_fit_intercept, max_iter=ETEC_max_iter, tol=ETEC_tol
                                , warm_start=ETEC_warm_start, verbose=ETEC_verbose)
@@ -904,6 +1188,44 @@ class ETEC_PoissonRegressor:
     def coef(classifier):
         return classifier.coef_
 
+    def visualization(x_train,y_train,X_test,y_test):
+        model = PoissonRegressor()
+        visualizer = ResidualsPlot(model,hist=False, qqplot=True)
+
+        visualizer.fit(x_train, y_train)  # Fit the training data to the visualizer
+        visualizer.score(X_test, y_test)  # Evaluate the model on the test data
+
+        visualizer.show()
+
+
+    def regression_results(x_train, y_train):
+            x_train = sm.add_constant(x_train)
+            model = sm.OLS(y_train, x_train).fit()
+            # fig = plt.figure(figsize=(12, 8))
+            # fig = sm.graphics.plot_regress_exog(model,fig=fig)
+            return model
+    def regplot1(model):
+
+            fig = plt.figure(figsize=(12, 8))
+            fig = sm.graphics.plot_partregress_grid(model)
+            fig.tight_layout(pad=1.0)
+
+            return fig
+    def regplot2(model):
+
+            fig = plt.figure(figsize=(12, 8))
+            fig = sm.graphics.plot_ccpr_grid(model)
+            fig.tight_layout(pad=1.0)
+
+            return fig
+
+
+    def prediction_error(X_train,y_train,X_test,y_test):
+
+        model = PredictionError(PoissonRegressor())
+        model.fit(X_train, y_train)
+        model.score(X_test, y_test)
+        model.poof()
 
 
 class ETEC_LassoRegressor:
@@ -911,8 +1233,7 @@ class ETEC_LassoRegressor:
     def Train(ETEC_X_Train, ETEC_Y_Train,ETEC_alpha=1.0, *, ETEC_fit_intercept=True, ETEC_normalize='deprecated',
               ETEC_precompute=False, ETEC_copy_X=True, ETEC_max_iter=1000, ETEC_tol=0.0001,
               ETEC_warm_start=False, ETEC_positive=False, ETEC_random_state=None, ETEC_selection='cyclic'):
-        from sklearn.linear_model import Lasso
-        Lasso
+
 
 
 
@@ -941,26 +1262,566 @@ class ETEC_LassoRegressor:
     def coef(classifier):
         return classifier.coef_
 
-    # def Report(ETEC_Y_test, y_pred):
-    #     rep = classification_report(ETEC_Y_test, y_pred, output_dict=True)
-    #     df = pd.DataFrame(rep).transpose()
-    #     return df
+    def visualization(x_train, y_train, X_test, y_test):
+        model = Lasso()
+        visualizer = ResidualsPlot(model, hist=False, qqplot=True)
 
-    #        return classification_report(ETEC_Y_test, y_pred)
+        visualizer.fit(x_train, y_train)  # Fit the training data to the visualizer
+        visualizer.score(X_test, y_test)  # Evaluate the model on the test data
+
+        visualizer.show()
+
+    def regression_results(x_train, y_train):
+        x_train = sm.add_constant(x_train)
+        model = sm.OLS(y_train, x_train).fit()
+        # fig = plt.figure(figsize=(12, 8))
+        # fig = sm.graphics.plot_regress_exog(model,fig=fig)
+        return model
+
+    def regplot1(model):
+        fig = plt.figure(figsize=(12, 8))
+        fig = sm.graphics.plot_partregress_grid(model)
+        fig.tight_layout(pad=1.0)
+
+        return fig
+
+    def regplot2(model):
+        fig = plt.figure(figsize=(12, 8))
+        fig = sm.graphics.plot_ccpr_grid(model)
+        fig.tight_layout(pad=1.0)
+
+        return fig
+
+    def prediction_error(X_train, y_train, X_test, y_test):
+        model = PredictionError(Lasso())
+        model.fit(X_train, y_train)
+        model.score(X_test, y_test)
+        model.poof()
+
+
+class ETEC_ElasticNetCV_Regressor:
+
+    def Train(ETEC_X_Train, ETEC_Y_Train, *, ETEC_l1_ratio=0.5, ETEC_eps=0.001, ETEC_n_alphas=100, ETEC_alphas=None, ETEC_fit_intercept=True,
+              ETEC_normalize='deprecated', ETEC_precompute='auto', ETEC_max_iter=1000, ETEC_tol=0.0001, ETEC_cv=None,
+              ETEC_copy_X=True, ETEC_verbose=0, ETEC_n_jobs=None, ETEC_positive=False, ETEC_random_state=None, ETEC_selection='cyclic'):
+        from sklearn.linear_model import ElasticNetCV
+
+        ElasticNet_R = ElasticNetCV( l1_ratio=ETEC_l1_ratio, eps=ETEC_eps, n_alphas=ETEC_n_alphas, alphas=ETEC_alphas,
+                               fit_intercept=ETEC_fit_intercept, normalize=ETEC_normalize, precompute=ETEC_precompute, max_iter=ETEC_max_iter,
+                               tol=ETEC_tol, cv=ETEC_cv, copy_X=ETEC_copy_X, verbose=ETEC_verbose, n_jobs=ETEC_n_jobs, positive=ETEC_positive,
+                               random_state=None, selection=ETEC_selection)
+        ElasticNet_R.fit(ETEC_X_Train, ETEC_Y_Train)
+
+        # prediction
+        return ElasticNet_R
+
+    def Prediction(classifier, ETEX_X_Test):
+        return classifier.predict(ETEX_X_Test)
+
+    def Mean_square_error(ETEC_Y_test, y_pred):
+        return mean_squared_error(ETEC_Y_test, y_pred)
+
+
+    def Accuracy(Y_test, y_pred):
+        from sklearn.metrics import r2_score
+        return r2_score(Y_test, y_pred)*100
+
+    def coef(classifier):
+        return classifier.coef_
+    def visualization(x_train, y_train, X_test, y_test):
+        model = ElasticNetCV()
+        visualizer = ResidualsPlot(model, hist=False, qqplot=True)
+
+        visualizer.fit(x_train, y_train)  # Fit the training data to the visualizer
+        visualizer.score(X_test, y_test)  # Evaluate the model on the test data
+
+        visualizer.show()
+
+    def regression_results(x_train, y_train):
+        x_train = sm.add_constant(x_train)
+        model = sm.OLS(y_train, x_train).fit()
+        # fig = plt.figure(figsize=(12, 8))
+        # fig = sm.graphics.plot_regress_exog(model,fig=fig)
+        return model
+
+    def regplot1(model):
+        fig = plt.figure(figsize=(12, 8))
+        fig = sm.graphics.plot_partregress_grid(model)
+        fig.tight_layout(pad=1.0)
+
+        return fig
+
+    def regplot2(model):
+        fig = plt.figure(figsize=(12, 8))
+        fig = sm.graphics.plot_ccpr_grid(model)
+        fig.tight_layout(pad=1.0)
+
+        return fig
+
+    def prediction_error(X_train, y_train, X_test, y_test):
+        model = PredictionError(ElasticNetCV())
+        model.fit(X_train, y_train)
+        model.score(X_test, y_test)
+        model.poof()
 
 
 
-    # def Visualization(ETEC_Y_test, y_pred):
-    #     plt.figure(figsize=(8, 8))
-    #     sns.heatmap(confusion_matrix(ETEC_Y_test.values, y_pred, ), xticklabels=ETEC_Y_test.drop_duplicates(),
-    #                 yticklabels=ETEC_Y_test.drop_duplicates(), annot=True,
-    #                 fmt="d", cmap="Blues", annot_kws={"size": 20});
-    #     plt.title("Linear Regression", fontsize=25)
-    #     plt.ylabel('True class')
-    #     plt.xlabel('Predicted class')
-    #     # plt.savefig('DT/decission tree.png')
-    #     # InlineBackend.figure_format = "DT"
-    #     # plt.show()
+class ETEC_BayesianRidge_Regressor:
 
-        # return plt
+    def Train(ETEC_X_Train, ETEC_Y_Train, *, ETEC_n_iter=300, ETEC_tol=0.001, ETEC_alpha_1=1e-06, ETEC_alpha_2=1e-06,
+              ETEC_lambda_1=1e-06, ETEC_lambda_2=1e-06, ETEC_alpha_init=None, ETEC_lambda_init=None, ETEC_compute_score=False,
+              ETEC_fit_intercept=True, ETEC_normalize='deprecated', ETEC_copy_X=True, ETEC_verbose=False):
 
+        BayesianRidge_R = BayesianRidge(n_iter=ETEC_n_iter, tol=ETEC_tol, alpha_1=ETEC_alpha_1, alpha_2=ETEC_alpha_2,
+              lambda_1=ETEC_lambda_1, lambda_2=ETEC_lambda_2, alpha_init=ETEC_alpha_init, lambda_init=ETEC_lambda_init, compute_score=ETEC_compute_score,
+              fit_intercept=ETEC_fit_intercept, normalize=ETEC_normalize, copy_X=ETEC_copy_X, verbose=ETEC_verbose)
+        BayesianRidge_R.fit(ETEC_X_Train, ETEC_Y_Train)
+
+        # prediction
+        return BayesianRidge_R
+
+    def Prediction(classifier, ETEX_X_Test):
+        return classifier.predict(ETEX_X_Test)
+
+    def Mean_square_error(ETEC_Y_test, y_pred):
+        return mean_squared_error(ETEC_Y_test, y_pred)
+
+
+    def Accuracy(Y_test, y_pred):
+        from sklearn.metrics import r2_score
+        return r2_score(Y_test, y_pred)*100
+
+    def coef(classifier):
+        return classifier.coef_
+    def visualization(x_train, y_train, X_test, y_test):
+        model = BayesianRidge()
+        visualizer = ResidualsPlot(model, hist=False, qqplot=True)
+
+        visualizer.fit(x_train, y_train)  # Fit the training data to the visualizer
+        visualizer.score(X_test, y_test)  # Evaluate the model on the test data
+
+        visualizer.show()
+
+    def regression_results(x_train, y_train):
+        x_train = sm.add_constant(x_train)
+        model = sm.OLS(y_train, x_train).fit()
+        # fig = plt.figure(figsize=(12, 8))
+        # fig = sm.graphics.plot_regress_exog(model,fig=fig)
+        return model
+
+    def regplot1(model):
+        fig = plt.figure(figsize=(12, 8))
+        fig = sm.graphics.plot_partregress_grid(model)
+        fig.tight_layout(pad=1.0)
+
+        return fig
+
+    def regplot2(model):
+        fig = plt.figure(figsize=(12, 8))
+        fig = sm.graphics.plot_ccpr_grid(model)
+        fig.tight_layout(pad=1.0)
+
+        return fig
+
+    def prediction_error(X_train, y_train, X_test, y_test):
+        model = PredictionError(BayesianRidge())
+        model.fit(X_train, y_train)
+        model.score(X_test, y_test)
+        model.poof()
+
+
+class ETEC_GaussianProcess_Regressor:
+
+    def Train(ETEC_X_Train, ETEC_Y_Train, ETEC_kernel=None, *, ETEC_alpha=1e-10, ETEC_optimizer='fmin_l_bfgs_b',
+              ETEC_n_restarts_optimizer=0, ETEC_normalize_y=False, ETEC_copy_X_train=True, ETEC_random_state=None):
+
+        GaussianProcess_R = GaussianProcessRegressor(kernel=ETEC_kernel,  alpha=ETEC_alpha, optimizer=ETEC_optimizer, n_restarts_optimizer=ETEC_n_restarts_optimizer,
+                                          normalize_y=ETEC_normalize_y, copy_X_train=ETEC_copy_X_train, random_state=ETEC_random_state)
+        GaussianProcess_R.fit(ETEC_X_Train, ETEC_Y_Train)
+
+        # prediction
+        return GaussianProcess_R
+
+    def Prediction(classifier, ETEX_X_Test):
+        return classifier.predict(ETEX_X_Test)
+
+    def Mean_square_error(ETEC_Y_test, y_pred):
+        return mean_squared_error(ETEC_Y_test, y_pred)
+
+
+    def Accuracy(Y_test, y_pred):
+        from sklearn.metrics import r2_score
+        return r2_score(Y_test, y_pred)*100
+
+    # def coef(classifier):
+    #     return classifier.coef_
+    def visualization(x_train, y_train, X_test, y_test):
+        model = GaussianProcessRegressor()
+        visualizer = ResidualsPlot(model, hist=False, qqplot=True)
+
+        visualizer.fit(x_train, y_train)  # Fit the training data to the visualizer
+        visualizer.score(X_test, y_test)  # Evaluate the model on the test data
+
+        visualizer.show()
+
+    def regression_results(x_train, y_train):
+        x_train = sm.add_constant(x_train)
+        model = sm.OLS(y_train, x_train).fit()
+        # fig = plt.figure(figsize=(12, 8))
+        # fig = sm.graphics.plot_regress_exog(model,fig=fig)
+        return model
+
+    def regplot1(model):
+        fig = plt.figure(figsize=(12, 8))
+        fig = sm.graphics.plot_partregress_grid(model)
+        fig.tight_layout(pad=1.0)
+
+        return fig
+
+    def regplot2(model):
+        fig = plt.figure(figsize=(12, 8))
+        fig = sm.graphics.plot_ccpr_grid(model)
+        fig.tight_layout(pad=1.0)
+
+        return fig
+
+    def prediction_error(X_train, y_train, X_test, y_test):
+        model = PredictionError(GaussianProcessRegressor())
+        model.fit(X_train, y_train)
+        model.score(X_test, y_test)
+        model.poof()
+
+
+class ETEC_Random_forest_reg    :
+
+    def Train(ETEC_X_Train, ETEC_Y_Train,ETEC_n_estimators=100, *, ETEC_criterion='squared_error', ETEC_max_depth=None,
+              ETEC_min_samples_split=2, ETEC_min_samples_leaf=1, ETEC_min_weight_fraction_leaf=0.0, ETEC_max_features=1.0,
+              ETEC_max_leaf_nodes=None, ETEC_min_impurity_decrease=0.0, ETEC_bootstrap=True, ETEC_oob_score=False,
+              ETEC_n_jobs=None, ETEC_random_state=None, ETEC_verbose=0, ETEC_warm_start=False, ETEC_ccp_alpha=0.0, ETEC_max_samples=None):
+
+        RFR = RandomForestRegressor( n_estimators=ETEC_n_estimators,  criterion=ETEC_criterion, max_depth=ETEC_max_depth, min_samples_split=ETEC_min_samples_split,
+                    min_samples_leaf=ETEC_min_samples_leaf, min_weight_fraction_leaf=ETEC_min_weight_fraction_leaf, max_features=ETEC_max_features, max_leaf_nodes=ETEC_max_leaf_nodes,
+                    min_impurity_decrease=ETEC_min_impurity_decrease, bootstrap=ETEC_bootstrap, oob_score=ETEC_oob_score, n_jobs=ETEC_n_jobs,
+                    random_state=ETEC_random_state, verbose=ETEC_verbose, warm_start=ETEC_warm_start, ccp_alpha=ETEC_ccp_alpha, max_samples=ETEC_max_samples)
+        RFR.fit(ETEC_X_Train, ETEC_Y_Train)
+
+
+        # prediction
+        return RFR
+
+    def Prediction(classifier, ETEX_X_Test):
+        return classifier.predict(ETEX_X_Test)
+
+    # def score(classifier,X_test, y_test):
+    #     return classifier.score(X_test,y_test)*100
+
+    def Mean_square_error(ETEC_Y_test, y_pred):
+        return mean_squared_error(ETEC_Y_test, y_pred)
+
+
+    def Accuracy(Y_test, y_pred):
+        from sklearn.metrics import r2_score
+        return r2_score(Y_test, y_pred)*100
+
+    def coef(classifier):
+        return classifier.coef_
+
+    def visualization(x_train, y_train, X_test, y_test):
+        model = RandomForestRegressor()
+        visualizer = ResidualsPlot(model, hist=False, qqplot=True)
+
+        visualizer.fit(x_train, y_train)  # Fit the training data to the visualizer
+        visualizer.score(X_test, y_test)  # Evaluate the model on the test data
+
+        visualizer.show()
+    def regression_results(x_train, y_train):
+        x_train = sm.add_constant(x_train)
+        model = sm.OLS(y_train, x_train).fit()
+        # fig = plt.figure(figsize=(12, 8))
+        # fig = sm.graphics.plot_regress_exog(model,fig=fig)
+        return model
+
+    def regplot1(model):
+        fig = plt.figure(figsize=(12, 8))
+        fig = sm.graphics.plot_partregress_grid(model)
+        fig.tight_layout(pad=1.0)
+
+        return fig
+
+    def regplot2(model):
+        fig = plt.figure(figsize=(12, 8))
+        fig = sm.graphics.plot_ccpr_grid(model)
+        fig.tight_layout(pad=1.0)
+
+        return fig
+
+    def prediction_error(X_train, y_train, X_test, y_test):
+        model = PredictionError(RandomForestRegressor())
+        model.fit(X_train, y_train)
+        model.score(X_test, y_test)
+        model.poof()
+
+
+class ETEC_ridge_regression    :
+
+    def Train(ETEC_X_Train, ETEC_Y_Train,ETEC_alpha=0.5):
+
+        ridgeR = Ridge(alpha=ETEC_alpha)
+
+        ridgeR.fit(ETEC_X_Train, ETEC_Y_Train)
+
+        return ridgeR
+
+    def Prediction(classifier, ETEX_X_Test):
+        return classifier.predict(ETEX_X_Test)
+
+    def score(classifier,X_test, y_test):
+        return classifier.score(X_test,y_test)*100
+
+    def Mean_square_error(ETEC_Y_test, y_pred):
+        return mean_squared_error(ETEC_Y_test, y_pred)
+
+
+    def Accuracy(Y_test, y_pred):
+        from sklearn.metrics import r2_score
+        return r2_score(Y_test, y_pred)*100
+
+    def coef(classifier):
+        return classifier.coef_
+
+    def visualization(x_train, y_train, X_test, y_test):
+        model = Ridge()
+        visualizer = ResidualsPlot(model, hist=False, qqplot=True)
+
+        visualizer.fit(x_train, y_train)  # Fit the training data to the visualizer
+        visualizer.score(X_test, y_test)  # Evaluate the model on the test data
+
+        visualizer.show()
+    def regression_results(x_train, y_train):
+        x_train = sm.add_constant(x_train)
+        model = sm.OLS(y_train, x_train).fit()
+        # fig = plt.figure(figsize=(12, 8))
+        # fig = sm.graphics.plot_regress_exog(model,fig=fig)
+        return model
+
+    def regplot1(model):
+        fig = plt.figure(figsize=(12, 8))
+        fig = sm.graphics.plot_partregress_grid(model)
+        fig.tight_layout(pad=1.0)
+
+        return fig
+
+    def regplot2(model):
+        fig = plt.figure(figsize=(12, 8))
+        fig = sm.graphics.plot_ccpr_grid(model)
+        fig.tight_layout(pad=1.0)
+
+        return fig
+
+    def prediction_error(X_train, y_train, X_test, y_test):
+        model = PredictionError(Ridge())
+        model.fit(X_train, y_train)
+        model.score(X_test, y_test)
+        model.poof()
+
+
+class ETEC_neural_regression    :
+
+    def Train(ETEC_X_Train, ETEC_Y_Train,ETEC_hidden_layer_sizes=(100,), ETEC_activation='relu', *, ETEC_solver='adam',
+              ETEC_alpha=0.0001, ETEC_batch_size='auto', ETEC_learning_rate='constant', ETEC_learning_rate_init=0.001,
+              ETEC_power_t=0.5, ETEC_max_iter=200, ETEC_shuffle=True, ETEC_random_state=None, ETEC_tol=0.0001, ETEC_verbose=False,
+              ETEC_warm_start=False, ETEC_momentum=0.9, ETEC_nesterovs_momentum=True, ETEC_early_stopping=False, ETEC_validation_fraction=0.1,
+              ETEC_beta_1=0.9, ETEC_beta_2=0.999, ETEC_epsilon=1e-08, ETEC_n_iter_no_change=10, ETEC_max_fun=15000):
+
+        neural_r = MLPRegressor(hidden_layer_sizes=ETEC_hidden_layer_sizes, activation=ETEC_activation,  solver=ETEC_solver,
+              alpha=ETEC_alpha, batch_size=ETEC_batch_size, learning_rate=ETEC_learning_rate, learning_rate_init=ETEC_learning_rate_init,
+              power_t=ETEC_power_t, max_iter=ETEC_max_iter, shuffle=ETEC_shuffle, random_state=ETEC_random_state, tol=ETEC_tol, verbose=ETEC_verbose,
+              warm_start=ETEC_warm_start, momentum=ETEC_momentum, nesterovs_momentum=ETEC_nesterovs_momentum, early_stopping=ETEC_early_stopping, validation_fraction=ETEC_validation_fraction,
+              beta_1=ETEC_beta_1, beta_2=ETEC_beta_2, epsilon=ETEC_epsilon, n_iter_no_change=ETEC_n_iter_no_change, max_fun=ETEC_max_fun)
+
+        neural_r.fit(ETEC_X_Train, ETEC_Y_Train)
+
+        return neural_r
+
+    def Prediction(classifier, ETEX_X_Test):
+        return classifier.predict(ETEX_X_Test)
+
+    def score(classifier,X_test, y_test):
+        return classifier.score(X_test,y_test)*100
+
+    def Mean_square_error(ETEC_Y_test, y_pred):
+        return mean_squared_error(ETEC_Y_test, y_pred)
+
+
+    def Accuracy(Y_test, y_pred):
+        from sklearn.metrics import r2_score
+        return r2_score(Y_test, y_pred)*100
+
+    def coef(classifier):
+        return classifier.coefs_
+
+
+    def visualization(x_train, y_train, X_test, y_test):
+        model = MLPRegressor()
+        visualizer = ResidualsPlot(model, hist=False, qqplot=True)
+
+        visualizer.fit(x_train, y_train)  # Fit the training data to the visualizer
+        visualizer.score(X_test, y_test)  # Evaluate the model on the test data
+
+        visualizer.show()
+    def regression_results(x_train, y_train):
+        x_train = sm.add_constant(x_train)
+        model = sm.OLS(y_train, x_train).fit()
+        # fig = plt.figure(figsize=(12, 8))
+        # fig = sm.graphics.plot_regress_exog(model,fig=fig)
+        return model
+
+    def regplot1(model):
+        fig = plt.figure(figsize=(12, 8))
+        fig = sm.graphics.plot_partregress_grid(model)
+        fig.tight_layout(pad=1.0)
+
+        return fig
+
+    def regplot2(model):
+        fig = plt.figure(figsize=(12, 8))
+        fig = sm.graphics.plot_ccpr_grid(model)
+        fig.tight_layout(pad=1.0)
+
+        return fig
+
+    def prediction_error(X_train, y_train, X_test, y_test):
+        model = PredictionError(MLPRegressor())
+        model.fit(X_train, y_train)
+        model.score(X_test, y_test)
+        model.poof()
+
+
+class ETEC_SVR_regression    :
+
+    def Train(ETEC_X_Train, ETEC_Y_Train,*, ETEC_kernel='rbf', ETEC_degree=3, ETEC_gamma='scale', ETEC_coef0=0.0,
+              ETEC_tol=0.001, ETEC_C=1.0, ETEC_epsilon=0.1, ETEC_shrinking=True, ETEC_cache_size=200, ETEC_verbose=False, ETEC_max_iter=-1):
+
+        SVR_r = SVR( kernel=ETEC_kernel, degree=ETEC_degree, gamma=ETEC_gamma, coef0=ETEC_coef0, tol=ETEC_tol,
+                                C=ETEC_C, epsilon=ETEC_epsilon, shrinking=ETEC_shrinking, cache_size=ETEC_cache_size, verbose=ETEC_verbose, max_iter=ETEC_max_iter)
+
+        SVR_r.fit(ETEC_X_Train, ETEC_Y_Train)
+
+        return SVR_r
+
+    def Prediction(classifier, ETEX_X_Test):
+        return classifier.predict(ETEX_X_Test)
+
+    def score(classifier,X_test, y_test):
+        return classifier.score(X_test,y_test)*100
+
+    def Mean_square_error(ETEC_Y_test, y_pred):
+        return mean_squared_error(ETEC_Y_test, y_pred)
+
+
+    def Accuracy(Y_test, y_pred):
+        from sklearn.metrics import r2_score
+        return r2_score(Y_test, y_pred)*100
+
+    # def coef(classifier):
+    #     return classifier.coefs_
+
+    def visualization(x_train, y_train, X_test, y_test):
+        model = SVR()
+        visualizer = ResidualsPlot(model, hist=False, qqplot=True)
+
+        visualizer.fit(x_train, y_train)  # Fit the training data to the visualizer
+        visualizer.score(X_test, y_test)  # Evaluate the model on the test data
+
+        visualizer.show()
+    def regression_results(x_train, y_train):
+        x_train = sm.add_constant(x_train)
+        model = sm.OLS(y_train, x_train).fit()
+        # fig = plt.figure(figsize=(12, 8))
+        # fig = sm.graphics.plot_regress_exog(model,fig=fig)
+        return model
+
+    def regplot1(model):
+        fig = plt.figure(figsize=(12, 8))
+        fig = sm.graphics.plot_partregress_grid(model)
+        fig.tight_layout(pad=1.0)
+
+        return fig
+
+    def regplot2(model):
+        fig = plt.figure(figsize=(12, 8))
+        fig = sm.graphics.plot_ccpr_grid(model)
+        fig.tight_layout(pad=1.0)
+
+        return fig
+
+    def prediction_error(X_train, y_train, X_test, y_test):
+        model = PredictionError(SVR())
+        model.fit(X_train, y_train)
+        model.score(X_test, y_test)
+        model.poof()
+
+
+class ETEC_KNN_regression    :
+
+    def Train(ETEC_X_Train, ETEC_Y_Train,ETEC_n_neighbors=5, *, ETEC_weights='uniform',
+              ETEC_algorithm='auto', ETEC_leaf_size=30, ETEC_p=2, ETEC_metric='minkowski', ETEC_metric_params=None, ETEC_n_jobs=None):
+
+        KNN_r = KNeighborsRegressor( n_neighbors=5,  weights='uniform', algorithm='auto',
+                     leaf_size=30, p=2, metric='minkowski', metric_params=None, n_jobs=None)
+
+        KNN_r.fit(ETEC_X_Train, ETEC_Y_Train)
+
+        return KNN_r
+
+    def Prediction(classifier, ETEX_X_Test):
+        return classifier.predict(ETEX_X_Test)
+
+    def score(classifier,X_test, y_test):
+        return classifier.score(X_test,y_test)*100
+
+    def Mean_square_error(ETEC_Y_test, y_pred):
+        return mean_squared_error(ETEC_Y_test, y_pred)
+
+
+    def Accuracy(Y_test, y_pred):
+        from sklearn.metrics import r2_score
+        return r2_score(Y_test, y_pred)*100
+
+    # def coef(classifier):
+    #     return classifier.coefs_
+
+    def visualization(x_train, y_train, X_test, y_test):
+        model = KNeighborsRegressor()
+        visualizer = ResidualsPlot(model, hist=True)
+
+        visualizer.fit(x_train, y_train)  # Fit the training data to the visualizer
+        visualizer.score(X_test, y_test)  # Evaluate the model on the test data
+
+        visualizer.show()
+    def regression_results(x_train, y_train):
+        x_train = sm.add_constant(x_train)
+        model = sm.OLS(y_train, x_train).fit()
+        # fig = plt.figure(figsize=(12, 8))
+        # fig = sm.graphics.plot_regress_exog(model,fig=fig)
+        return model
+
+    def regplot1(model):
+        fig = plt.figure(figsize=(12, 8))
+        fig = sm.graphics.plot_partregress_grid(model)
+        fig.tight_layout(pad=1.0)
+
+        return fig
+
+    def regplot2(model):
+        fig = plt.figure(figsize=(12, 8))
+        fig = sm.graphics.plot_ccpr_grid(model)
+        fig.tight_layout(pad=1.0)
+
+        return fig
+
+    def prediction_error(X_train, y_train, X_test, y_test):
+        model = PredictionError(KNeighborsRegressor())
+        model.fit(X_train, y_train)
+        model.score(X_test, y_test)
+        model.poof()
